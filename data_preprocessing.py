@@ -1,6 +1,5 @@
 import os
 
-print(os.getcwd())
 # Create directory for masks
 parentDir = 'git/face-segmentation'
 masksDir = 'CelebAMask-HQ-masks'
