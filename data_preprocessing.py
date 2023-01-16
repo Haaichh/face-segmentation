@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import cv2
+from utils import create_directory
 
 FACES = 30000
 FACES_PER_FOLDER = 2000
@@ -9,16 +10,16 @@ ROOT_DIR = os.path.dirname(os.path.abspath('data_preprocessing.py'))
 MASK_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ-mask')
 ANNO_MASK_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebAMask-HQ-mask-anno')
 
-def create_directory():
-    # Create mask directory
-    try:
-        os.mkdir(MASK_DIR)
-        print('Directory ' + MASK_DIR + ' created')
-    except FileExistsError:
-        print('Directory ' + MASK_DIR + ' already exists')
-
 def create_mask():
     # Merge annotated masks
+
+    if os.path.isfile(os.path.join(MASK_DIR, '29999.png')):
+        print('Masks already exist, would you like to rewrite the masks?')
+        ans = input('Input [y/n]: ')
+        if ans == 'n':
+            return 'Did not rewrite masks'
+
+    print('Creating masks... this may take a while')
     for image_num in range(FACES):
         folder_num = image_num // FACES_PER_FOLDER
         base_image = np.zeros((512, 512))
@@ -31,5 +32,7 @@ def create_mask():
             
         cv2.imwrite((os.path.join(MASK_DIR, str(image_num) + '.png')), base_image)
 
-create_directory()
-create_mask()
+    return 'Finished creating masks'
+
+create_directory(MASK_DIR)
+print(create_mask())
