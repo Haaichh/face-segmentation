@@ -5,7 +5,7 @@ from utils import create_directory
 
 ROOT_DIR = os.path.dirname(os.path.abspath('data_split.py'))
 MASK_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ-mask')
-IMG_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebAMask-HQ-img')
+IMG_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebA-HQ-img')
 MAPPING_TXT = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebA-HQ-to-CelebA-mapping.txt')
 
 def train_test_val():
