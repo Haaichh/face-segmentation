@@ -2,7 +2,9 @@ import math
 import matplotlib as plt
 import torch
 import torch.nn as nn
+import torchvision.transforms as T
 from torch.utils.data import DataLoader
+from sklearn.metrics import f1_score
 from data_loader import CelebAMask
 from model import UNet
 
@@ -10,7 +12,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
     print('Device name:', device)
     
-    BATCH_SIZE = 1
+    BATCH_SIZE = 50
     train = CelebAMask(mode='train')
     data_loader_train = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
@@ -23,7 +25,7 @@ if __name__ == '__main__':
     loss_func = nn.CrossEntropyLoss()
 
     NUM_EPOCHS = 100
-    LEARNING_RATE = 0.01
+    LEARNING_RATE = 0.1
     MOMENTUM = 0.9
     optim = torch.optim.SGD(model.parameters(), lr = LEARNING_RATE, weight_decay = 0.05, momentum = MOMENTUM)
 
@@ -59,6 +61,13 @@ if __name__ == '__main__':
             total += float(labels.size(0) * labels.size(1) * labels.size(2))
             total_loss += float(loss*inputs.shape[0])
 
+            #transform = T.ToPILImage()
+            #pred_img = transform(pred_y[0] / 255.0)
+            #pred_img.show()
+
+            #true_img = transform(labels[0] / 255.0)
+            #true_img.show()
+
             if (i+1) % 100 == 0:
                 print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch + 1, NUM_EPOCHS, i + 1, iterations_per_epoch, loss.item()))
         
@@ -72,6 +81,7 @@ if __name__ == '__main__':
         total_loss = 0
         correct = 0
         total = 0
+        f1_score = 0
         with torch.no_grad():
             for inputs, labels in data_loader_test:
                 inputs = inputs.to(device)
@@ -87,12 +97,14 @@ if __name__ == '__main__':
                 correct += float((pred_y == labels).sum())
                 total += float(labels.size(0) * labels.size(1) * labels.size(2))
                 total_loss += float(loss*inputs.shape[0])
+                f1_score += f1_score(labels[0].flatten(), pred_y[0].flatten(), average='macro')
         
         total_loss /= len(test)
         testing_losses.append(total_loss)
         testing_accuracies.append((correct/total) * 100)
         model.train()
 
+        print('Test f1_score at epoch {}: {:.4f}\n'.format(epoch + 1, f1_score/len(test)))
         print('Test accuracy at epoch {}: {:.4f}\n'.format(epoch + 1, testing_accuracies[-1]))
 
 
