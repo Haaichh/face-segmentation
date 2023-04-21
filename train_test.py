@@ -35,6 +35,7 @@ if __name__ == '__main__':
     training_accuracies = []
     testing_losses = []
     testing_accuracies = []
+    testing_f1_scores = []
 
     for epoch in range(NUM_EPOCHS):
 
@@ -102,6 +103,7 @@ if __name__ == '__main__':
         total_loss /= len(test)
         testing_losses.append(total_loss)
         testing_accuracies.append((correct/total) * 100)
+        testing_f1_scores.append(f1_score/len(test))
         model.train()
 
         print('Test f1_score at epoch {}: {:.4f}\n'.format(epoch + 1, f1_score/len(test)))
