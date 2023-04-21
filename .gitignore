@@ -7,3 +7,4 @@ train_img/
 train_mask/
 val_img/
 val_mask/
+iou.py
