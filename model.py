@@ -2,10 +2,8 @@ import torch
 import torch.nn as nn
 
 class UNet(nn.Module):
-    def __init__(self, features=8):
+    def __init__(self, features=32):
         super(UNet, self).__init__()
-
-        #self.layers = [in, 8, 16, 32, 64, 128, 256]
 
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=2)
@@ -42,8 +40,6 @@ class UNet(nn.Module):
         self.up8 = nn.Conv2d(in_channels=features, out_channels=features, kernel_size=3, stride=1, padding='same')
 
         self.finalconv = nn.Conv2d(in_channels=features, out_channels=19, kernel_size=1, stride=1)
-
-        #self.layers = [in, 8, 16, 32, 64, 128, 256]
 
     def forward(self, x):
 
