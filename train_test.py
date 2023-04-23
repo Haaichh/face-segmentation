@@ -1,10 +1,12 @@
 import math
+import os
 import matplotlib as plt
 import torch
 import torch.nn as nn
 import torchvision.transforms as T
 from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score
+
 from data_loader import CelebAMask
 from model import UNet
 
@@ -24,8 +26,8 @@ if __name__ == '__main__':
     model = model.to(device)
     loss_func = nn.CrossEntropyLoss()
 
-    NUM_EPOCHS = 100
-    LEARNING_RATE = 0.01
+    NUM_EPOCHS = 15
+    LEARNING_RATE = 0.001
     optim = torch.optim.Adam(model.parameters(), lr = LEARNING_RATE)
 
     # Initialise variables for computing and tracking stats
@@ -62,15 +64,15 @@ if __name__ == '__main__':
             total += float(labels.size(0) * labels.size(1) * labels.size(2))
             total_loss += float(loss*inputs.shape[0])
 
-            transform = T.ToPILImage()
-            pred_img = transform(pred_y[0] / 255.0)
-            pred_img.show()
+            #transform = T.ToPILImage()
+            #pred_img = transform(pred_y[0] / 255.0)
+            #pred_img.show()
 
-            true_img = transform(labels[0] / 255.0)
-            true_img.show()
+            #true_img = transform(labels[0] / 255.0)
+            #true_img.show()
 
-            #if (i+1) % 100 == 0:
-            print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch + 1, NUM_EPOCHS, i + 1, iterations_per_epoch, loss.item()))
+            if (i+1) % 100 == 0:
+                print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch + 1, NUM_EPOCHS, i + 1, iterations_per_epoch, loss.item()))
         
         total_loss /= len(train)
         training_losses.append(total_loss)
@@ -103,12 +105,13 @@ if __name__ == '__main__':
         total_loss /= len(test)
         testing_losses.append(total_loss)
         testing_accuracies.append((correct/total) * 100)
-        testing_f1_scores.append(f1/len(test))
+        testing_f1_scores.append(f1/len(data_loader_test))
         model.train()
 
-        print('Test f1_score at epoch {}: {:.4f}'.format(epoch + 1, f1/len(test)))
+        print('Test f1_score at epoch {}: {:.4f}'.format(epoch + 1, testing_f1_scores[-1]))
         print('Test accuracy at epoch {}: {:.4f}\n'.format(epoch + 1, testing_accuracies[-1]))
 
+    torch.save(model.state_dict(), os.path.join(os.path.abspath('train_test.py'), 'checkpoint'))
 
     plt.title('Training Accuracy')
     plt.plot(range(len(training_accuracies)), training_accuracies, 'g')
@@ -120,7 +123,6 @@ if __name__ == '__main__':
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
-
     plt.title('Testing Accuracy')
     plt.plot(range(len(testing_accuracies)), testing_accuracies, 'g')
     plt.xlabel('Epoch')
@@ -130,3 +132,8 @@ if __name__ == '__main__':
     plt.plot(range(len(testing_losses)), testing_losses, 'r')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
+
+    plt.title('Testing F1 Scores')
+    plt.plot(range(len(testing_f1_scores)), testing_f1_scores, 'r')
+    plt.xlabel('Epoch')
+    plt.ylabel('F1 Score')
