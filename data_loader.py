@@ -22,7 +22,7 @@ class CelebAMask(Dataset):
         img = Image.open(img_path)
         mask = Image.open(mask_path)
 
-        transform = transforms.Compose([transforms.PILToTensor(), transforms.Resize(256)])
+        transform = transforms.Compose([transforms.PILToTensor(), transforms.Grayscale(), transforms.Resize(256)])
         img_tensor = transform(img).float()/255
         mask_tensor = transform(mask).float()/255
 
