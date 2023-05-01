@@ -1,6 +1,7 @@
 import math
 import os
-import matplotlib as plt
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
 import torchvision.transforms as T
@@ -14,7 +15,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
     print('Device name:', device)
     
-    BATCH_SIZE = 32
+    BATCH_SIZE = 16
     train = CelebAMask(mode='train')
     data_loader_train = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
@@ -22,7 +23,9 @@ if __name__ == '__main__':
     data_loader_test = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
     # Instantiate the model and loss function
-    model = UNet()
+    model = UNet(mode='batchnorm')
+    #model = UNet()
+    
     model = model.to(device)
     loss_func = nn.CrossEntropyLoss()
 
@@ -64,13 +67,6 @@ if __name__ == '__main__':
             total += float(labels.size(0) * labels.size(1) * labels.size(2))
             total_loss += float(loss*inputs.shape[0])
 
-            #transform = T.ToPILImage()
-            #pred_img = transform(pred_y[0] / 255.0)
-            #pred_img.show()
-
-            #true_img = transform(labels[0] / 255.0)
-            #true_img.show()
-
             if (i+1) % 100 == 0:
                 print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch + 1, NUM_EPOCHS, i + 1, iterations_per_epoch, loss.item()))
         
@@ -100,7 +96,7 @@ if __name__ == '__main__':
                 correct += float((pred_y == labels).sum())
                 total += float(labels.size(0) * labels.size(1) * labels.size(2))
                 total_loss += float(loss*inputs.shape[0])
-                f1 += f1_score(labels[0].cpu().flatten(), pred_y[0].cpu().flatten(), average='macro')
+                f1 += f1_score(labels[0].cpu().flatten(), pred_y[0].cpu().flatten(), labels=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18], average='macro', zero_division=1)
         
         total_loss /= len(test)
         testing_losses.append(total_loss)
@@ -111,29 +107,10 @@ if __name__ == '__main__':
         print('Test f1_score at epoch {}: {:.4f}'.format(epoch + 1, testing_f1_scores[-1]))
         print('Test accuracy at epoch {}: {:.4f}\n'.format(epoch + 1, testing_accuracies[-1]))
 
-    torch.save(model.state_dict(), os.path.join(os.path.abspath('train_test.py'), 'checkpoint'))
+    torch.save(model.state_dict(), 'batchnorm_64.pt')
 
-    plt.title('Training Accuracy')
-    plt.plot(range(len(training_accuracies)), training_accuracies, 'g')
-    plt.xlabel('Epoch')
-    plt.ylabel('Classification accuracy')
-
-    plt.title('Training Loss')
-    plt.plot(range(len(training_losses)), training_losses, 'r')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-
-    plt.title('Testing Accuracy')
-    plt.plot(range(len(testing_accuracies)), testing_accuracies, 'g')
-    plt.xlabel('Epoch')
-    plt.ylabel('Classification accuracy')
-
-    plt.title('Testing Loss')
-    plt.plot(range(len(testing_losses)), testing_losses, 'r')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-
-    plt.title('Testing F1 Scores')
-    plt.plot(range(len(testing_f1_scores)), testing_f1_scores, 'r')
-    plt.xlabel('Epoch')
-    plt.ylabel('F1 Score')
+    np.savetxt('batchnorm_train_acc.csv', training_accuracies, delimiter=',')
+    np.savetxt('batchnorm_train_loss.csv', training_losses, delimiter=',')
+    np.savetxt('batchnorm_test_acc.csv', testing_accuracies, delimiter=',')
+    np.savetxt('batchnorm_test_loss.csv', testing_losses, delimiter=',')
+    np.savetxt('batchnorm_test_f1.csv', testing_f1_scores, delimiter=',')

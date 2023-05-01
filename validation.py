@@ -20,15 +20,12 @@ if __name__ == '__main__':
 
     # Load the model
     model = UNet()
-    model.load_state_dict(torch.load(os.path.join(os.path.abspath('validation.py'), 'checkpoint')))
+    model.load_state_dict(torch.load('checkpoint.pt'))
     model = model.to(device)
     model.eval()
     loss_func = nn.CrossEntropyLoss()
 
     # Initialise variables for computing and tracking stats
-    val_losses = []
-    val_accuracies = []
-    val_f1_scores = []
     correct= 0
     total = 0
     total_loss = 0
@@ -49,29 +46,9 @@ if __name__ == '__main__':
             correct += float((pred_y == labels).sum())
             total += float(labels.size(0) * labels.size(1) * labels.size(2))
             total_loss += float(loss*inputs.shape[0])
-            f1 += f1_score(labels[0].cpu().flatten(), pred_y[0].cpu().flatten(), average=None)
-    
-    total_loss /= len(val)
-    val_losses.append(total_loss)
-    val_accuracies.append((correct/total) * 100)
-    val_f1_scores.append(f1/len(data_loader_val))
-    model.train()
+            temp = f1_score(labels[0].cpu().flatten(), pred_y[0].cpu().flatten(), labels=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18], average=None, zero_division=1)
+            f1 += temp
 
-    print('Validation f1_score: {:.4f}'.format(val_f1_scores[-1]))
-    print('Validation accuracy: {:.4f}'.format(val_accuracies[-1]))
-    print('Validation loss: {:.4f}'.format(val_losses[-1]))
-
-    plt.title('Validation Accuracy')
-    plt.plot(range(len(val_accuracies)), val_accuracies, 'g')
-    plt.xlabel('Epoch')
-    plt.ylabel('Classification accuracy')
-
-    plt.title('Validation Loss')
-    plt.plot(range(len(val_losses)), val_losses, 'r')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-
-    plt.title('Validation F1 Score')
-    plt.plot(range(len(val_f1_scores)), val_f1_scores, 'g')
-    plt.xlabel('Epoch')
-    plt.ylabel('Classification accuracy')
+    print('Validation f1_score: {:.4f}'.format(f1/len(data_loader_val)))
+    print('Validation accuracy: {:.4f}'.format((correct/total) * 100))
+    print('Validation loss: {:.4f}'.format(total_loss/len(val)))
