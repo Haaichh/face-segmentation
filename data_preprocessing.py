@@ -11,7 +11,7 @@ MASK_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ-mask')
 ANNO_MASK_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebAMask-HQ-mask-anno')
 
 def create_mask():
-    # Merge annotated masks
+    """Merges annotated masks into a single ground truth segmentation mask."""
 
     if os.path.isfile(os.path.join(MASK_DIR, '29999.png')):
         print('Masks already exist, would you like to rewrite the masks?')

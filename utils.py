@@ -1,7 +1,8 @@
 import os
 
 def create_directory(dir):
-    # Creates directory
+    """Creates directory"""
+
     try:
         os.mkdir(dir)
         print('Directory ' + dir + ' created')
