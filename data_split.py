@@ -9,7 +9,7 @@ IMG_DIR = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebA-HQ-img')
 MAPPING_TXT = os.path.join(ROOT_DIR, 'CelebAMask-HQ/CelebA-HQ-to-CelebA-mapping.txt')
 
 def train_test_val():
-    # Splits data into train, test, and validation sets
+    """Splits data into train, test, and validation sets."""
 
     # Create directories for the split data
     train_mask = 'train_mask'

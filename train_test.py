@@ -1,5 +1,4 @@
 import math
-import os
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -9,12 +8,17 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score
 
 from data_loader import CelebAMask
-from model import UNet
+from unet import UNet
+from unetbatchnorm import UNetBatchNorm
 
 if __name__ == '__main__':
+    """Training and testing loop."""
+
+    # Set the device - CPU or GPU if available
     device = torch.device("cuda" if torch.cuda.is_available() else 'cpu')
     print('Device name:', device)
     
+    # Create the training and testing set dataloaders
     BATCH_SIZE = 16
     train = CelebAMask(mode='train')
     data_loader_train = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
@@ -23,9 +27,7 @@ if __name__ == '__main__':
     data_loader_test = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
     # Instantiate the model and loss function
-    model = UNet(mode='batchnorm')
-    #model = UNet()
-    
+    model = UNet()
     model = model.to(device)
     loss_func = nn.CrossEntropyLoss()
 
@@ -107,8 +109,10 @@ if __name__ == '__main__':
         print('Test f1_score at epoch {}: {:.4f}'.format(epoch + 1, testing_f1_scores[-1]))
         print('Test accuracy at epoch {}: {:.4f}\n'.format(epoch + 1, testing_accuracies[-1]))
 
+    # Save the state of the model after taining
     torch.save(model.state_dict(), 'batchnorm_64.pt')
 
+    # Save accuracy, loss, and F1-score statistics
     np.savetxt('batchnorm_train_acc.csv', training_accuracies, delimiter=',')
     np.savetxt('batchnorm_train_loss.csv', training_losses, delimiter=',')
     np.savetxt('batchnorm_test_acc.csv', testing_accuracies, delimiter=',')
